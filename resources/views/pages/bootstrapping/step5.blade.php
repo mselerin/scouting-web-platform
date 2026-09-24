@@ -3,19 +3,21 @@
 /**
  * Belgian Scouting Web Platform
  * Copyright (C) 2014-2023 Julien Dupuis
- * 
+ *
  * This code is licensed under the GNU General Public License.
- * 
+ *
  * This is free software, and you are welcome to redistribute it
  * under under the terms of the GNU General Public License.
- * 
+ *
  * It is distributed without any warranty; without even the
  * implied warranty of merchantability or fitness for a particular
  * purpose. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  **/
+use App\Helpers\Form;
+use App\Models\Parameter;
 ?>
 
 @section('title')
@@ -60,7 +62,7 @@
           et l'envoi d'e-mails aux membres d'une section.
         </p>
         <div class="form-horizontal well">
-          {!! Form::open(array('route' => array('bootstrapping_step', 'step' => 5, 'action' => 'configuration'))) !!}
+          {!! Form::open(array('url' => URL::route('bootstrapping_step', array('step' => 5)), 'action' => 'configuration')) !!}
             <div class="form-group">
               <div class="col-sm-4 control-label">
                 {!! Form::label('default_email_from_address', "Adresse e-mail du site") !!}
@@ -206,5 +208,5 @@
         @endif
       @endif
     </div>
-  </div>  
+  </div>
 @stop
