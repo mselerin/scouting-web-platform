@@ -1,16 +1,16 @@
 /**
  * Belgian Scouting Web Platform
  * Copyright (C) 2014-2023 Julien Dupuis
- * 
+ *
  * This code is licensed under the GNU General Public License.
- * 
+ *
  * This is free software, and you are welcome to redistribute it
  * under under the terms of the GNU General Public License.
- * 
+ *
  * It is distributed without any warranty; without even the
  * implied warranty of merchantability or fitness for a particular
  * purpose. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  **/
@@ -58,6 +58,7 @@ window.dismissMemberForm = function() {
  */
 window.editMember = function(memberId) {
   $("#member_form [name='member_id']").val(memberId);
+  $("#member_form [name='organization_number']").val(members[memberId].organization_number);
   $("#member_form [name='first_name']").val(members[memberId].first_name);
   $("#member_form [name='last_name']").val(members[memberId].last_name);
   $("#member_form [name='birth_date_day']").val(members[memberId].birth_date_day);

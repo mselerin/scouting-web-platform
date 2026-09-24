@@ -2,16 +2,16 @@
 /**
  * Belgian Scouting Web Platform
  * Copyright (C) 2014-2023 Julien Dupuis
- * 
+ *
  * This code is licensed under the GNU General Public License.
- * 
+ *
  * This is free software, and you are welcome to redistribute it
  * under under the terms of the GNU General Public License.
- * 
+ *
  * It is distributed without any warranty; without even the
  * implied warranty of merchantability or fitness for a particular
  * purpose. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  **/
@@ -26,16 +26,17 @@ use App\Helpers\DateHelper;
 
 /**
  * This Eloquent class represents a member (scout or leader) registered in the unit
- * 
+ *
  * Columns:
  *   Identity
- *   - first_name:       The first name of the member
- *   - last_name:        The last name of the member
- *   - birth_date:       The date of birth
- *   - gender:           The gender ('M'/'F') of the member
- *   - nationality:      The nationality of the member ('BE', 'FR', etc.)
- *   - has_handicap:     Whether the member has a handicap
- *   - handicap_details: A short explanation about the handicap (if any)
+ *   - organization_number: The member identifier in the organization (DESK)
+ *   - first_name:          The first name of the member
+ *   - last_name:           The last name of the member
+ *   - birth_date:          The date of birth
+ *   - gender:              The gender ('M'/'F') of the member
+ *   - nationality:         The nationality of the member ('BE', 'FR', etc.)
+ *   - has_handicap:        Whether the member has a handicap
+ *   - handicap_details:    A short explanation about the handicap (if any)
  *   Scout-related details
  *   - totem:                         The totem of the member (if any)
  *   - quali:                         The quali of the member (if any)
@@ -73,7 +74,7 @@ use App\Helpers\DateHelper;
  *   - in_waiting_list
  *   - registration_date
  *   - registration_siblings
- *   - registration_former_leader_child	
+ *   - registration_former_leader_child
  *   - registration_section_category
  *   - registration_priority
  *   Leader stuff
@@ -90,26 +91,26 @@ use App\Helpers\DateHelper;
  *                                    not actually a member as long as this field is false)
  */
 class Member extends Model {
-  
+
   protected $guarded = array('id', 'created_at', 'updated_at');
-  
+
   // Folder in the file system (relative to the storage folder) in which leader pictures are stored
   public static $PICTURE_FOLDER_PATH = "app/site_data/leader_pictures/";
-  
+
   /**
    * Returns the section this member belongs to
    */
   public function getSection() {
     return Section::find($this->section_id);
   }
-  
+
   /**
    * Returns the birth date in a human readable format ('d/m/Y')
    */
   public function getHumanBirthDate() {
     return date('d/m/Y', strtotime($this->birth_date));
   }
-  
+
   /**
    * Returns whether there is a registered member with the given
    * e-mail address as parent's or member's e-mail address
@@ -126,7 +127,7 @@ class Member extends Model {
     if ($aMember) return true;
     else return false;
   }
-  
+
   /**
    * Returns whether the member is reregistered for the next year
    */
@@ -134,35 +135,35 @@ class Member extends Model {
     if ($this->last_reregistration != "2023-2024")
     return $this->last_reregistration == date('Y') . "-" . (date('Y') + 1);
   }
-  
+
   /**
    * Returns the URL at which the leader picture can be downloaded
    */
   public function getPictureURL() {
     return URL::route('get_member_picture', array('leader_id' => $this->id));
   }
-  
+
   /**
    * Returns the path in the local file system where the leader picture file is
    */
   public function getPicturePath() {
     return $this->getPicturePathFolder() . $this->getPicturePathFilename();
   }
-  
+
   /**
    * Returns the folder in the local file system containg the leader picture file
    */
   public function getPicturePathFolder() {
     return storage_path(self::$PICTURE_FOLDER_PATH);
   }
-  
+
   /**
    * Returns the filename of the leader picture file in the file system
    */
   public function getPicturePathFilename() {
     return $this->id . ".picture";
   }
-  
+
   /**
    * Returns the array of family members in other units to plug in
    * in a html select element
@@ -170,7 +171,7 @@ class Member extends Model {
   public static function getFamilyOtherUnitsForSelect() {
     return array('0' => "Aucun", '1' => "1", '2' => '2 ou plus');
   }
-  
+
   /**
    * Returns the personal phone number (or a parent's phone number if no personal phone number)
    */
@@ -181,14 +182,14 @@ class Member extends Model {
     if ($this->phone3) return $this->phone3;
     return "";
   }
-  
+
   /**
    * Returns the first name and last name of the member, separated by a space
    */
   public function getFullName() {
     return $this->first_name . " " . $this->last_name;
   }
-  
+
   /**
    * Returns a public phone number of this member
    */
@@ -199,11 +200,11 @@ class Member extends Model {
     if ($this->phone_member && !$this->phone_member_private) return $this->phone_member;
     return "";
   }
-  
+
   /**
    * Returns the list of public phone numbers of this members as a string
    * (including parent's and personal phone numbers)
-   * 
+   *
    * @param string $separator  The separator used between the phone numbers
    * @param boolean $showAlsoPrivate  If true, private phone numbers are also included
    */
@@ -219,7 +220,7 @@ class Member extends Model {
       $phones .= ($phones ? $separator : "") . $this->phone_member . " (personnel)";
     return $phones;
   }
-  
+
   /**
    * Returns the list of parent's public phone numbers
    */
@@ -230,14 +231,14 @@ class Member extends Model {
     if ($this->phone3 && !$this->phone3_private) $phones[] = $this->phone3;
     return $phones;
   }
-  
+
   /**
    * Returns whether there exists at least the e-mail address of one parent
    */
   public function hasParentsEmailAddress() {
     return $this->email1 || $this->email2 || $this->email3 ? true : false;
   }
-  
+
   /**
    * Returns the list of e-mail addresses of the parents
    */
@@ -248,10 +249,10 @@ class Member extends Model {
     if ($this->email3) $emails[] = $this->email3;
     return $emails;
   }
-  
+
   /**
    * Returns the list of e-mail addresses as a string
-   * 
+   *
    * @param string $separator  The separator used between the e-mail addresses
    * @param boolean $includePersonal  If true, the personal e-mail address is included
    */
@@ -267,11 +268,11 @@ class Member extends Model {
       $emails .= ($emails ? $separator : "") . Helper::sanitizeForHTML($this->email_member) . " (personnel)";
     return $emails;
   }
-  
+
   /**
    * If input data is correct, updates this member and returns true.
    * If input data is incorrect, returns false or an error message.
-   * 
+   *
    * @param type $canEditIdentity  Whether the current user is allowed to edit identity information
    * @param type $canEditContact  Whether the current user is allowed to edit contact information
    * @param type $canEditSection  Whether the current user is allowed to change the section
@@ -321,7 +322,8 @@ class Member extends Model {
     }
     // Update section
     if ($canEditSection) {
-        $this->section_id = $data['section_id'];
+      $this->section_id = $data['section_id'];
+      $this->organization_number = $data['organization_number'];
     }
     // Update totem, quali and subgroup
     if ($canEditTotem) {
@@ -358,11 +360,11 @@ class Member extends Model {
       return false;
     }
   }
-  
+
   /**
    * If input data is correct, creates and returns a new user.
    * If input data is incorrect, returns false or an error message.
-   * 
+   *
    * @param boolean $validate  If true, the newly created member is immediately marked as registered
    */
   public static function createFromInput(Request $request, $validate = false) {
@@ -396,12 +398,12 @@ class Member extends Model {
       return false;
     }
   }
-  
+
   /**
    * Checks whether the input data is valid. If it is valid, returns
    * the an array containg the data. If it is invalid, returns a string
    * containing an error message.
-   * 
+   *
    * @param type $newMember  Whether the member is being created (true) or updated (false)
    * @param type $canEditIdentity  Whether the current user is allowed to edit identity information
    * @param type $canEditContact  Whether the current user is allowed to edit contact information
@@ -411,6 +413,7 @@ class Member extends Model {
    */
   private static function checkInputData(Request $request, $newMember = true, $canEditIdentity = true, $canEditContact = true, $canEditSection = true, $canEditTotem = true, $canEditLeader = true) {
     // Get data from input
+    $organizationNumber = $request->input('organization_number');
     $firstName = $request->input('first_name');
     $lastName = $request->input('last_name');
     $birthDateDay = $request->input('birth_date_day');
@@ -496,7 +499,7 @@ class Member extends Model {
       // Phone numbers
       $phone1 = Helper::formatPhoneNumber($phone1Unformatted);
       if ($phone1Unformatted && !$phone1)
-        $errorMessage .= "Le numéro de téléphone \"$phone1Unformatted\" n'est pas valide. ";    
+        $errorMessage .= "Le numéro de téléphone \"$phone1Unformatted\" n'est pas valide. ";
       $phone2 = Helper::formatPhoneNumber($phone2Unformatted);
       if ($phone2Unformatted && !$phone2)
         $errorMessage .= "Le numéro de téléphone \"$phone2Unformatted\" n'est pas valide. ";
@@ -551,6 +554,7 @@ class Member extends Model {
       return $errorMessage;
     } else {
       return array(
+          'organization_number' => $organizationNumber,
           'first_name' => $firstName,
           'last_name' => $lastName,
           'birth_date' => $birthDate,
@@ -599,7 +603,7 @@ class Member extends Model {
       );
     }
   }
-  
+
   /**
    * Saves the uploaded picture to the file system and updates the member
    * to mark it as having a leader picture. Returns this member instance, or
@@ -633,7 +637,7 @@ class Member extends Model {
     // There is no picture file
     return $this;
   }
-  
+
   /**
    * Updates the year in section of all members automatically based on the current
    * date and the year_in_section_last_update field
@@ -655,7 +659,7 @@ class Member extends Model {
       LogEntry::log("Inscription", "Augmentation automatique de l'année de tous les membres");
     }
   }
-  
+
   /**
    * Return whether this user can do the given action (privilege) for the given section
    */
@@ -688,7 +692,7 @@ class Member extends Model {
     // No associated leader or matching privilege
     return false;
   }
-  
+
   /**
    * Calculates the year in section
    */
@@ -705,5 +709,5 @@ class Member extends Model {
     $yearInSection = ($currentYear-$birthYear) - $startAge + 1;
     return $yearInSection;
   }
-  
+
 }

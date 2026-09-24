@@ -2,16 +2,16 @@
 /**
  * Belgian Scouting Web Platform
  * Copyright (C) 2014-2023 Julien Dupuis
- * 
+ *
  * This code is licensed under the GNU General Public License.
- * 
+ *
  * This is free software, and you are welcome to redistribute it
  * under under the terms of the GNU General Public License.
- * 
+ *
  * It is distributed without any warranty; without even the
  * implied warranty of merchantability or fitness for a particular
  * purpose. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  **/
@@ -31,10 +31,10 @@ use App\Models\HealthCard;
  * This class provides a function that outputs the members' listing in PDF, CSV or Excel format
  */
 class ListingPDF {
-  
+
   /**
    * Outputs the listing for download
-   * 
+   *
    * @param array $sections  The list of sections to include
    * @param string $output  The output format ('pdf', 'csv' or 'excel')
    * @param boolean $exportPrivateData  Whether the private data must be included in the listing (csv and pdf only)
@@ -50,7 +50,7 @@ class ListingPDF {
     $listingExcel = new ListingPDF();
     $listingExcel->doDownloadListing($sections, $output, $exportPrivateData, $includeScouts, $includeLeaders, $groupBySection);
   }
-  
+
   /**
    * Reorders a list of sections by placing the Unit section at the end
    */
@@ -67,33 +67,33 @@ class ListingPDF {
     if ($unit) $newSections[] = $unit;
     return $newSections;
   }
-  
+
   // The output format
   protected $output;
-  
+
   // Whether the private data must be included
   protected $exportPrivateData;
-  
+
   // Whether non-leader members must be included
   protected $includeScouts;
-  
+
   // Whether leader members must be included
   protected $includeLeaders;
-  
+
   // Whether members are grouped by section or mixed all together
   protected $groupBySection;
-  
+
   // Member counter
   protected $memberCounter = 1;
-  
+
   // Array containing the ids of all the selected sections
   protected $sectionIds;
-  
+
   // PDF styles
   protected $normalStyleArray = null;
   protected $headerStyleArray = null;
   protected $titleStyleArray = null;
-  
+
   /**
    * Outputs the listing for download
    */
@@ -188,7 +188,7 @@ class ListingPDF {
       $pdfDocument->Output("listing_$sectionSlug.pdf", "D");
     }
   }
-  
+
   /**
    * Creates a template Excel file
    */
@@ -202,7 +202,7 @@ class ListingPDF {
     $excelDocument->getProperties()->setSubject(utf8_decode(Parameter::get(Parameter::$UNIT_SHORT_NAME) . " - Listing " . (!$this->includeScouts ? "des animateurs " : "") . $delasection));
     $excelDocument->getProperties()->setDescription("Listing des " . ($this->includeScouts ? "scouts " : "animateurs ") . $delasection);
     // Define styles
-    
+
     /*$excelDocument->getDefaultStyle()->getBorders()->getTop()
             ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE);
     $excelDocument->getDefaultStyle()->getBorders()->getBottom()
@@ -218,7 +218,7 @@ class ListingPDF {
     */
     if (!$this->normalStyleArray) {
       $this->normalStyleArray =
-        array('borders' => array(  
+        array('borders' => array(
                       'top'  => array('style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE),
                       'right'    => array('style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE),
                       'left'    => array('style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE),
@@ -241,7 +241,7 @@ class ListingPDF {
                     )
            );
       $this->headerStyleArray =
-        array('borders' => array(  
+        array('borders' => array(
                       'top'  => array('style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE),
                       'right'    => array('style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE),
                       'left'    => array('style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_NONE),
@@ -257,10 +257,10 @@ class ListingPDF {
     }
     return $excelDocument;
   }
-  
+
   /**
    * Creates a sheet in the Excel document for a given section
-   * 
+   *
    * @param type $excelDocument  The document to fill in
    * @param type $sheetIndex  The index of the sheet to create
    * @param type $section  The section
@@ -324,6 +324,9 @@ class ListingPDF {
     $subgroupName = ($csvMode || !$section ? "Sous-groupe" : $section->subgroup_name);
     $titles = array();
     $titles[] = "N°";
+    if ($this->output != 'pdf') {
+      $titles[] = "N° DESK";
+    }
     if ($csvMode || (!$this->groupBySection && $this->output != 'pdf')) {
       $titles[] = "Section";
     }
@@ -373,6 +376,7 @@ class ListingPDF {
       $colSizes = array();
       foreach ($titles as $title) {
         if ($title == "N°") $colSizes[] = 4;
+        elseif ($title == "N° DESK") $colSizes[] = 10;
         elseif ($title == "Section") $colSizes[] = 10;
         elseif ($title == "Nom") $colSizes[] = 25;
         elseif ($title == "Prénom") $colSizes[] = 20;
@@ -449,6 +453,8 @@ class ListingPDF {
       foreach ($titles as $title) {
         if ($title == "N°")
           $excelDocument->getActiveSheet()->setCellValue("A$row", $this->memberCounter++);
+        elseif($title == "N° DESK")
+          $excelDocument->getActiveSheet()->setCellValue("$letter$row", $member->organization_number);
         elseif ($title == "Section")
           $excelDocument->getActiveSheet()->setCellValue("$letter$row", $member->getSection()->name);
         elseif($title == "Nom")
@@ -528,7 +534,7 @@ class ListingPDF {
       $excelDocument->getActiveSheet()->setTitle($section->name);
     }
   }
-  
+
   /**
    * Outputs the member pictures in PDF for download
    */
@@ -590,5 +596,5 @@ class ListingPDF {
     }
     $pdf->Output("Photos $sectionSlug.pdf", "D");
   }
-  
+
 }
